@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="icon" href="https://supermed.com.br/wp-content/uploads/2020/11/cropped-a04dcd6a777516b911471e4c6b8bb1df-32x32.png" sizes="32x32" />
+    <link rel="icon" href="https://supermed.com.br/wp-content/uploads/2020/11/cropped-a04dcd6a777516b911471e4c6b8bb1df-192x192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="https://supermed.com.br/wp-content/uploads/2020/11/cropped-a04dcd6a777516b911471e4c6b8bb1df-180x180.png" />
+    <meta name="msapplication-TileImage" content="https://supermed.com.br/wp-content/uploads/2020/11/cropped-a04dcd6a777516b911471e4c6b8bb1df-270x270.png" />
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <title>Supermed</title>
+  </head>
+
+  <body style="background-color: #021c2b;">
+  	<div class="row m-3">
+  		<div class="col-12 text-center">
+  			<img src="https://supermed.com.br/wp-content/uploads/2020/11/a04dcd6a777516b911471e4c6b8bb1df.png" class="img-fluid">
+        <h4 class="text-warning">Simulador de Plano de Saúde</h4>
+  		</div>
+  	</div>
+    <form id="form">
+    <div class="row m-3">
+          <label class="text-white"><strong>Beneficiários</strong></label>
+            <div class="col-lg-6 col-sm-12 mb-2">
+              <input type="text" name="nome" id="nome" placeholder="Nome do primeiro beneficiário" class="form-control" required="">
+            </div>
+            <div class="col-lg-6 col-12 mb-2">
+              <input type="number" name="idade" id="idade" min="0" max="120" step="1" placeholder="Idade do primeiro beneficiário" class="form-control" required="">
+            </div>
+            <div class="col-lg-6 col-sm-12 mb-2">
+              <input type="text" name="nome2" id="nome2" placeholder="Nome do segundo beneficiário" class="form-control" required="">
+            </div>
+            <div class="col-lg-6 col-12 mb-2">
+              <input type="number" name="idade2" id="idade2" min="0" max="120" step="1" placeholder="Idade do segundo beneficiário" class="form-control" required="">
+            </div>
+            <div class="col-lg-6 col-sm-12 mb-2">
+              <input type="text" name="nome3" id="nome3" placeholder="Nome do terceiro beneficiário" class="form-control" required="">
+            </div>
+            <div class="col-lg-6 col-12 mb-2">
+              <input type="number" name="idade3" id="idade3" min="0" max="120" step="1" placeholder="Idade do terceiro beneficiário" class="form-control" required="">
+            </div>
+          <div class="col-12 mb-2">
+            <select class="form-control" id="selectPlano" required="">
+              <option value="0">SELECIONE UM PLANO</option>
+            </select>
+          </div>
+          <div id="invalid" class="text-danger" style="display: none;">
+            <p>Por favor preencha todos os campos e selecione um plano.</p>
+          </div>
+          <div id="rconsulta" style="display: none;">
+            <div class="col-12 mb-2 bg-success text-white text-center">
+                  <strong>Resultado da Consulta</strong>
+            </div>
+            <hr class="bg-white">
+            <p class="text-white" id="rbeneficiado1"></p>
+            <p class="text-white" id="rbeneficiado2"></p>
+            <p class="text-white" id="rbeneficiado3"></p>
+            <p class="text-white" id="resultado"></p>
+            <hr class="bg-white">
+          </div>
+          <div class="col-12 d-grid gap-2 mb-2">
+            <button class="btn btn-success" id="consulta" type="submit">Consultar</button>
+            <a href="../" class="btn btn-default text-white">Voltar</a>
+          </div> 
+    </div>
+    <input type="hidden" name="custo1" id="custo1">
+    <input type="hidden" name="custo2" id="custo2">
+    <input type="hidden" name="custo3" id="custo3">
+    </form>   
+
+    <footer class="text-center mt-5">
+      <small class="text-white ">Todos os Direitos Reservados à Supermed © 2021</small>
+    </footer>
+
+    <script>
+      $(document).ready(function() {
+
+        function planosJson() {
+            $.getJSON('../planos.json', function(getPlanos) {
+              var selectPlano = document.getElementById('selectPlano');
+              for (var i = 0; i < getPlanos.length; i++) {
+                  selectPlano.innerHTML = selectPlano.innerHTML +
+                    '<option value="' + getPlanos[i]['codigo'] + '">' + getPlanos[i]['nome'] + '</option>';
+              }
+            });
+        }
+
+        $("#form").submit(function(){
+          return false; 
+        });
+
+        $('#consulta').click(function(){
+          var nome = $('#nome').val();
+          var idade = $('#idade').val();
+          var nome2 = $('#nome2').val();
+          var idade2 = $('#idade2').val();
+          var nome3 = $('#nome3').val();
+          var idade3 = $('#idade3').val();
+          var plano = $('#selectPlano').val();
+          var planoNome = $('#selectPlano :selected').text();
+          if (plano == 6) {
+            var minimo_vidas = 2;
+          } else {
+            var minimo_vidas = 1;
+          }
+
+          $.getJSON('../precos.json', function(getPrecos) {
+              for (var i = 0; i < getPrecos.length; i++) {
+                if (getPrecos[i].codigo == plano && getPrecos[i].minimo_vidas == minimo_vidas){
+                  if (idade >= 0 && idade <= 17) {
+                    var custo1 = $('#custo1').val(getPrecos[i].faixa1);
+                  } else if (idade >= 18 && idade <= 40) {             
+                    var custo1 = $('#custo1').val(getPrecos[i].faixa2);
+                  } else {
+                    var custo1 = $('#custo1').val(getPrecos[i].faixa3);
+                  }
+                }
+              }
+          });
+
+          $.getJSON('../precos.json', function(getPrecos) {
+              for (var i = 0; i < getPrecos.length; i++) {
+                if (getPrecos[i].codigo == plano && getPrecos[i].minimo_vidas == minimo_vidas){
+                  if (idade2 >= 0 && idade2 <= 17) {
+                    $('#custo2').val(getPrecos[i].faixa1);
+                  } else if (idade2 >= 18 && idade2 <= 40) {             
+                    $('#custo2').val(getPrecos[i].faixa2);
+                  } else {
+                    $('#custo2').val(getPrecos[i].faixa3);
+                  }
+                }
+              }
+          });
+
+          $.getJSON('../precos.json', function(getPrecos) {
+              for (var i = 0; i < getPrecos.length; i++) {
+                if (getPrecos[i].codigo == plano && getPrecos[i].minimo_vidas == minimo_vidas){
+                  if (idade3 >= 0 && idade3 <= 17) {
+                    $('#custo3').val(getPrecos[i].faixa1);
+                  } else if (idade3 >= 18 && idade3 <= 40) {             
+                    $('#custo3').val(getPrecos[i].faixa2);
+                  } else {
+                    $('#custo3').val(getPrecos[i].faixa3);
+                  }
+                }
+              }
+          });
+          
+          if($('#selectPlano').val() == 0 || $('#nome').val() == '' || $('#idade').val() == '' || $('#nome2').val() == '' || $('#idade2').val() == '' || $('#nome3').val() == '' || $('#idade3').val() == ''){
+            $('#invalid').show();
+            $('#rconsulta').hide();
+          } else {
+            $('#invalid').hide();
+            resultado(planoNome);
+          }
+          
+        });
+
+        function resultado(planoNome){
+          setTimeout(function(){ 
+            var custoTotal = parseFloat(custo1.value)+parseFloat(custo2.value)+parseFloat(custo3.value);
+            $('#rbeneficiado1').html($('#nome').val()+ ' de ' +$('#idade').val()+ ' anos, tem custo de R$'+ parseFloat(custo1.value).toFixed(2));
+            $('#rbeneficiado2').html($('#nome2').val()+ ' de ' +$('#idade2').val()+ ' anos, tem custo de R$'+ parseFloat(custo2.value).toFixed(2));
+            $('#rbeneficiado3').html($('#nome3').val()+ ' de ' +$('#idade3').val()+ ' anos, tem custo de R$'+ parseFloat(custo3.value).toFixed(2));
+            $('#resultado').html('O '+planoNome+ ' para os <strong class="text-warning">3 beneficiários</strong> custa no total: <strong class="text-success">R$'+custoTotal.toFixed(2)+'</strong>');
+            $('#rconsulta').show();
+          }, 500);
+        }
+
+        planosJson();
+      });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+  </body>
+</html>
